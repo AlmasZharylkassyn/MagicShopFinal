@@ -48,7 +48,7 @@ public class WindowWithTheSeller extends Container { //nihuia ne gotovo tozhe
         MainImage = new JLabel();                           //Изменить название картинки
         MainImage.setBounds(0, 0, 1280, 720);
         MainImage.setIcon(imageIcon1);
-        add(MainImage);
+
 
         ImageIcon imageIcon2 = Main.mf.createIcon("/images/LoginMenuImageNewTemp2.png"); //LoginMenuImageNewTemp1 //LoginMenuImageNew
         tMainImage = new JLabel();                           //Изменить название картинки
@@ -69,5 +69,6 @@ public class WindowWithTheSeller extends Container { //nihuia ne gotovo tozhe
         });
         add(tempB);
         //remove(MainImage);
+        add(MainImage);
     }
 }
