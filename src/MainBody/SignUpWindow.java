@@ -4,18 +4,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 
 public class SignUpWindow extends Container {
 
     private JLabel MainImage;
-
-    private Connection connection;
-    private ResultSet resultSet;
-
-    private PreparedStatement preparedStatement;
 
     private JTextField username;
     private JTextField pass;
@@ -33,18 +25,11 @@ public class SignUpWindow extends Container {
         setSize(1280, 720);
         setLayout(null);
 
-        connection = Connect.ConnectDb();
-
         font = new Font(null, Font.CENTER_BASELINE, 18);
 
         username = new JTextField();
         username.setBounds(610, 193, 250, 40);
         username.setFont(font);
-        //ImageIcon imageUsername = Main.mf.createIcon("ForUsername.png");
-        //JLabel tempLabel = new JLabel();
-        //tempLabel.setBounds(550, 100, 180, 68);
-        //tempLabel.setIcon(imageUsername);
-        //add(tempLabel);
         username.setBackground(Color.LIGHT_GRAY);
         add(username);
 
@@ -60,12 +45,6 @@ public class SignUpWindow extends Container {
         sec_questions.setBackground(Color.LIGHT_GRAY);
         add(sec_questions);
 
-        //secQuestion = new JTextField();
-        //secQuestion.setBounds(610, 386, 250, 40);
-        //secQuestion.setFont(font);
-        //secQuestion.setBackground(Color.LIGHT_GRAY);
-        //add(secQuestion);
-
         answer = new JTextField();
         answer.setBounds(610, 486, 250, 40);
         answer.setFont(font);
@@ -80,12 +59,6 @@ public class SignUpWindow extends Container {
         tempLabel.setFont(font);
         tempLabel.setForeground(Color.RED);
         add(tempLabel);
-
-        //JLabel temp = new JLabel();
-        //temp.setBounds(-200, -100, 643, 643);
-        //ImageIcon imageIcon = Main.mf.createIcon("xia-pu-.jpg"); //ButtonImage.png
-        //temp.setIcon(imageIcon);
-        //add(temp);
         /////////////////////////////////////////////////////
         /////////////////////////////////////////////////////
 
@@ -99,54 +72,14 @@ public class SignUpWindow extends Container {
                 if (!username.getText().equalsIgnoreCase("") && !pass.getText().equalsIgnoreCase("") &&
                 !answer.getText().equalsIgnoreCase("")) {
                     User user = new User(null, username.getText(), pass.getText(), (String) sec_questions.getSelectedItem(), answer.getText());
-                    user.setChoose("Registration");
-                    System.out.println(user + " kek");
+                    Data data = new Data("Registration", user);
+                    //System.out.println(user + " kek");
                     try {
-                        ClientSomthing cs = new ClientSomthing(Main.ipAddr, Main.port, user);
+                        Main.registration(data);
                     } catch (Exception eq) {
                         System.out.println("No connection to server, pls run server");
                         JOptionPane.showMessageDialog(null, "Run server first");
                     }
-                    /*try {
-                        String query = "select * from account where login=?";
-
-                        preparedStatement = connection.prepareStatement(query);
-                        preparedStatement.setString(1, username.getText());
-
-                        //preparedStatement.setString(2,pass.getText());
-
-                        resultSet = preparedStatement.executeQuery();
-                        if (resultSet.next()) {
-                            //resultSet.close();
-                            //preparedStatement.close();
-                            //System.out.println();
-                            JOptionPane.showMessageDialog(null, "There is already the user with the same login");
-                            //setVisible(false);
-                            //Loading l = new Loading();
-                            //l.setVisible(true);
-
-                        } else {
-                            //JOptionPane.showMessageDialog(null, "Incorrect login and password");
-                            try {
-                                String query1 = "select * from account where password=?";
-
-                                preparedStatement= connection.prepareStatement(query1);
-                                preparedStatement.setString(1, pass.getText());
-
-                                resultSet = preparedStatement.executeQuery();
-                                if (resultSet.next()) {
-                                    JOptionPane.showMessageDialog(null, "Correct pass");
-                                } else {
-                                    System.out.println("kek");
-                                }
-                            } catch (Exception eg) {
-                                eg.printStackTrace();
-                            }
-
-                        }
-                    } catch (Exception et) {
-                        et.printStackTrace();
-                    } */
                 } else {
                     JOptionPane.showMessageDialog(null, "Joldardy toltyr");
                 }

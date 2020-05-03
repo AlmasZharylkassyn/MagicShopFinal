@@ -1,17 +1,10 @@
 package MainBody;
 
-//import com.mysql.jdbc.Connection;
-
-import com.mysql.jdbc.log.Log;
-import java.sql.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import java.net.URL;
-import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
 public class LoginMenu extends Container { //изменить раположение функционала кнопки exit
 
@@ -25,6 +18,8 @@ public class LoginMenu extends Container { //изменить раположен
     private JButton buttonForgot;
     private JButton exit;
 
+    private JRadioButton adminButton;
+
     private Font font;
 
     public LoginMenu() {
@@ -37,18 +32,16 @@ public class LoginMenu extends Container { //изменить раположен
         username.setBounds(545, 150, 180, 40);
 
         username.setFont(font);
-        //ImageIcon imageUsername = Main.mf.createIcon("ForUsername.png");
-        //JLabel tempLabel = new JLabel();
-        //tempLabel.setBounds(550, 100, 180, 68);
-        //tempLabel.setIcon(imageUsername);
-        //add(tempLabel);
-        username.setBackground(Color.LIGHT_GRAY);
+        Color textFieldColor = new Color(128, 87, 61);
+        username.setForeground(new Color(0, 0, 0));
+        username.setBackground(textFieldColor);
         add(username);
 
         pass = new JPasswordField();
         pass.setBounds(545, 265, 180, 40);
         pass.setFont(font);
-        pass.setBackground(Color.LIGHT_GRAY);
+        pass.setBackground(textFieldColor);
+        pass.setForeground(Color.BLACK);
         add(pass);
 
         exit = new JButton();
@@ -63,6 +56,14 @@ public class LoginMenu extends Container { //изменить раположен
         });
         add(exit);
 
+        adminButton = new JRadioButton("ADMIN", false);
+        adminButton.setForeground(Color.BLACK);
+        //adminButton.setFont(font);
+        adminButton.setBounds(1170, 625, 120, 50);
+        Color myColor = new Color(94, 42, 9);
+        adminButton.setBackground(myColor);
+        add(adminButton);
+
         buttonLogin = new JButton();
         buttonLogin.setBounds(550, 340, 180, 68);
         ImageIcon imageLogin = Main.mf.createIcon("/images/ButtonImageLogin.png");
@@ -71,62 +72,40 @@ public class LoginMenu extends Container { //изменить раположен
             @Override
             public void actionPerformed( ActionEvent e ) {
                 User user = new User(null, username.getText(), pass.getText(), null, null);
-                user.setChoose("login");
-                if (user.getName().equalsIgnoreCase("") || user.getPass().equalsIgnoreCase("")) {
-                    dialogError(false);
-                }
-                else {
-                    try {
-                        ClientSomthing cs = new ClientSomthing(Main.ipAddr, Main.port, user);
-                    } catch (Exception y) {
-                        System.out.println("No connection to server, pls run server");
-                        JOptionPane.showMessageDialog(null, "Run server first");
-                    }
-                }
-                /*
-                try{
-
-                    String query = "select * from account where login=? and password=?";
-
-                    preparedStatement = connection.prepareStatement(query);
-                    preparedStatement.setString(1,username.getText());
-
-                    preparedStatement.setString(2,pass.getText());
-
-                    resultSet = preparedStatement.executeQuery();
-                    if (resultSet.next()){
-                        resultSet.close();
-
-                        preparedStatement.close();
-
-                        username.setText("");
-                        pass.setText("");
-                        setVisible(false);
-                        Main.mf.windowWithTheSeller.setVisible(true);
-
-                    } else {
-                        //JOptionPane.showMessageDialog(null, "Incorrect login or password");
-                        JDialog dialog = Main.mf.createDialog("MESSAGE", true, 310, 160);
-
-                        JButton b2 = new JButton();
-                        b2.setBounds(0, 0, 310, 160);
-                        b2.addActionListener(new ActionListener() {
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                                dialog.dispose();
+                Data data = new Data("login", user);
+                if (!adminButton.isSelected()) {
+                    if (!username.getText().equals("admin")) {
+                        if (user.getName().equalsIgnoreCase("") || user.getPass().equalsIgnoreCase("")) {
+                            dialogError(false);
+                        } else {
+                            try {
+                                //ClientSomthing cs = new ClientSomthing(Main.ipAddr, Main.port, user);
+                                Main.login(data);
+                            } catch (Exception y) {
+                                System.out.println("No connection to server, pls run server");
+                                JOptionPane.showMessageDialog(null, "Run server first");
                             }
-                        });
-
-                        ImageIcon errorImage2 = Main.mf.createIcon("ErrorDialogFon.png");
-                        b2.setIcon(errorImage2);
-
-                        dialog.add(b2);
-                        dialog.setVisible(true);
+                        }
+                    } else {
+                        //System.out.println("kek");
+                        dialogError(false);
                     }
-                }catch (Exception et){
-                    et.printStackTrace();
                 }
-                */
+                else if (adminButton.isSelected() && username.getText().equals("admin")){
+                    if (user.getName().equalsIgnoreCase("") || user.getPass().equalsIgnoreCase("")) {
+                        dialogError(false);
+                    } else {
+                        try {
+                            Main.login(data);
+                        } catch (Exception y) {
+                            System.out.println("No connection to server, pls run server");
+                            JOptionPane.showMessageDialog(null, "Run server first");
+                        }
+                    }
+                }
+                else if (adminButton.isSelected() && !username.getText().equals("admin")) {
+                    JOptionPane.showMessageDialog(null, "Уберите галочку с радиобаттона ADMIN");
+                }
             }
         });
         add(buttonLogin);
@@ -181,47 +160,55 @@ public class LoginMenu extends Container { //изменить раположен
         MainImage.setBounds(0, 0, 1280, 720);
         MainImage.setIcon(imageIcon);
         add(MainImage);
-
-        //Main.mf.MainMenu();
-
-       // JButton jButton = new JButton("kek");
-        //jButton.setBounds(20, 20, 100, 100);
-        //add(jButton);
-
-
-        //Image img1 = new ImageIcon(MainFrame.class.getResource("LoginMenuImage.png")).getImage();
-
-        //Main.mf.setContentPane(new JLabel(new ImageIcon(img1)));
-
-        //setLayout(new FlowLayout());
     }
 
     public void dialogError(Boolean choice1) {
-        if(choice1 == true) {
-            username.setText("");
-            pass.setText("");
-            setVisible(false);
-            Main.mf.windowWithTheSeller.setVisible(true);
+        if (!username.getText().equals("admin")) {
+            if (choice1 == true) {
+                JDialog dialog = Main.mf.createDialog("MESSAGE", true, 310, 160);
+                JButton b2 = new JButton();
+                b2.setBounds(0, 0, 310, 160);
+                b2.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        username.setText("");
+                        pass.setText("");
+                        dialog.dispose();
+                        setVisible(false);
+                        Main.mf.windowWithTheSeller.setVisible(true);
+                    }
+                });
+                ImageIcon errorImage1 = Main.mf.createIcon("/images/ShablonButtonsBlue.jpg");
+                b2.setIcon(errorImage1);
+                dialog.add(b2);
+                dialog.setVisible(true);
+            }
+            else if (choice1 == false) {
+                JDialog dialog = Main.mf.createDialog("MESSAGE", true, 310, 160);
+
+                JButton b2 = new JButton();
+                b2.setBounds(0, 0, 310, 160);
+                b2.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        dialog.dispose();
+                    }
+                });
+                ImageIcon errorImage2 = Main.mf.createIcon("/images/ErrorDialogFon.png");
+                b2.setIcon(errorImage2);
+                dialog.add(b2);
+                dialog.setVisible(true);
+            }
         }
-        else if (choice1 == false) {
-            JDialog dialog = Main.mf.createDialog("MESSAGE", true, 310, 160);
-
-            JButton b2 = new JButton();
-            b2.setBounds(0, 0, 310, 160);
-            b2.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    dialog.dispose();
-                }
-            });
-
-            ImageIcon errorImage2 = Main.mf.createIcon("/images/ErrorDialogFon.png");
-            b2.setIcon(errorImage2);
-
-            dialog.add(b2);
-            dialog.setVisible(true);
-
-           //JOptionPane.showMessageDialog(dialog, "");
+        else if (username.getText().equals("admin") && adminButton.isSelected() && choice1) {
+            MainAdmin.main(null);
+            Main.mf.dispose();
+        }
+        else if (username.getText().equals("admin") && !adminButton.isSelected()) {
+            JOptionPane.showMessageDialog(null,"Click on the radioButton ADMIN first");
+        }
+        else if (username.getText().equals("admin") && adminButton.isSelected() && !choice1) {
+            JOptionPane.showMessageDialog(null, "Неправильный пароль для админа");
         }
     }
 

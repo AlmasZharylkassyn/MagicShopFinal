@@ -12,6 +12,7 @@ public class MainFrame extends JFrame {
     public static WindowWithTheSeller windowWithTheSeller;
     public static SignUpWindow signUpWindow;
     public static ForgotWindow forgotWindow;
+    public static WindowWithTheProduct windowWithTheProduct;
 
     public MainFrame() {
         setSize(1280, 720);
@@ -19,12 +20,11 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         try {
-            Image img = new ImageIcon(MainFrame.class.getResource("/images/xia-pu-new.png")).getImage(); //MainIcon.png
+            Image img = new ImageIcon(MainFrame.class.getResource("/images/xia-pu-new.png")).getImage(); //MainIcon.png //iconMain.png
             this.setIconImage(img);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //setLayout(null);
 
         loginMenu = new LoginMenu();
         loginMenu.setLocation(0, 0);
@@ -45,18 +45,11 @@ public class MainFrame extends JFrame {
         forgotWindow.setVisible(false);
         add(forgotWindow);
 
-        //loginMenuImage();
+        windowWithTheProduct = new WindowWithTheProduct();
+        windowWithTheProduct.setLocation(0, 0);
+        windowWithTheProduct.setVisible(false);
+        add(windowWithTheProduct);
 
-        //Image img1 = new ImageIcon(MainFrame.class.getResource("LoginMenuImage.png")).getImage();
-
-        //setContentPane(new JLabel(new ImageIcon(img1)));
-
-        //setLayout(new FlowLayout());
-
-        //JLabel label1 = new JLabel("Test");
-        //add(label1);
-        //setVisible(true);
-        //setTitle("This is my Title");
         setLayout(null);
     }
 
@@ -90,4 +83,5 @@ public class MainFrame extends JFrame {
             return null;
         }
     }
+
 }

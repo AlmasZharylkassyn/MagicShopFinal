@@ -9,8 +9,10 @@ public class User implements Serializable {
     private String pass;
     private String sec_q;
     private String answer;
+    private Integer cash;
     private String choose; //команды как login, forgotSearch
     private boolean choice; //сервер возвращает правильно или нет
+    private Integer integer;
 
     public User() {
     }
@@ -21,6 +23,15 @@ public class User implements Serializable {
         this.pass = pass;
         this.sec_q = sec_q;
         this.answer = answer;
+    }
+
+    public User(Long id, String name, String pass, String sec_q, String answer, Integer cash) {
+        this.id = id;
+        this.name = name;
+        this.pass = pass;
+        this.sec_q = sec_q;
+        this.answer = answer;
+        this.cash = cash;
     }
 
     public String getOrder() {
@@ -87,8 +98,38 @@ public class User implements Serializable {
         this.answer = answer;
     }
 
+    public Integer getCash() {
+        return cash;
+    }
+
+    public void setCash(Integer cash) {
+        this.cash = cash;
+    }
+
+    public boolean isChoice() {
+        return choice;
+    }
+
+    public Integer getInteger() {
+        return integer;
+    }
+
+    public void setInteger(Integer integer) {
+        this.integer = integer;
+    }
+
     @Override
     public String toString() {
-        return name + " " + pass + " " + sec_q + " " + answer;
+        return "User{" + " id='" + id + '\'' +
+                "order='" + order + '\'' +
+                ", id=" + id +
+                ", name='" + name + '\'' +
+                ", pass='" + pass + '\'' +
+                ", sec_q='" + sec_q + '\'' +
+                ", answer='" + answer + '\'' +
+                ", cash=" + cash +
+                ", choose='" + choose + '\'' +
+                ", choice=" + choice +
+                '}';
     }
 }

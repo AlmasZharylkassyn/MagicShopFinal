@@ -1,14 +1,10 @@
 package MainBody;
 
-import javax.swing.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.*;
-//import java.sql.Connection;
-//import java.sql.PreparedStatement;
-//import java.sql.ResultSet;
-//import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class Server {
@@ -45,15 +41,12 @@ class ServerSomthing extends Thread {
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
 
-    private static Connection connection;
+    private static Connection connection = Connect.ConnectDb();
     private ResultSet resultSet;
     private PreparedStatement preparedStatement;
+    private Statement statement;
 
-    /**
-     * для общения с клиентом необходим сокет (адресные данные)
-     * @param socket
-     * @throws IOException
-     */
+    private Data data; //объект для передачи данных между сервером и клиентом
 
     public ServerSomthing(Socket socket) throws IOException {
         this.socket = socket;
@@ -61,54 +54,45 @@ class ServerSomthing extends Thread {
     }
     @Override
     public void run() {
-        connection = Connect.ConnectDb();
-        //String word;
+        //int i = 0;
         try {
             outputStream = new ObjectOutputStream(socket.getOutputStream());
             inputStream = new ObjectInputStream(socket.getInputStream());
-            // первое сообщение отправленное сюда - это никнейм
-            /*word = in.readLine();
-            try {
-                out.write(word + "\n");
-                out.flush(); // flush() нужен для выталкивания оставшихся данных
-                // если такие есть, и очистки потока для дьнейших нужд
-            } catch (IOException ignored) {}
-            */
-            User user = new User();
+            data = new Data();
             try {
                 while (true) {
                     try {
-                        user = (User) inputStream.readObject();
-                        //System.out.println(user);
+                        data = (Data) inputStream.readObject();
+                        //i++;
+                        //System.out.println("принял " + i);
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     }
 
-                    if (user.getChoose().equalsIgnoreCase("login")) {
+                    if (data.getOrder().equalsIgnoreCase("login")) {
                         try {
                             String query = "select * from account where login=? and password=?";
-
                             preparedStatement = connection.prepareStatement(query);
-                            preparedStatement.setString(1, user.getName());
-
-                            preparedStatement.setString(2, user.getPass());
-
+                            preparedStatement.setString(1, data.getUser().getName());
+                            preparedStatement.setString(2, data.getUser().getPass());
                             resultSet = preparedStatement.executeQuery();
                             if (resultSet.next()) {
-                                resultSet.close();
-                                System.out.println("Success SQL");
-                                preparedStatement.close();
+                                Integer in = resultSet.getInt("id");
+                                String qq = resultSet.getString("login");
+                                data.getUser().setInteger(in);
+                                data.getUser().setName(qq);
                                 try {
-                                    user.setChoice(true);
-                                    outputStream.writeObject(user);
+                                    data.setChoiceOfServer(true);
+                                    outputStream.writeObject(data);
                                     outputStream.flush();
+                                    preparedStatement.close();
+                                    resultSet.close();
                                 } catch (IOException ignored) {
                                 }
                             } else {
-                                System.out.println("Not Success SQL");
                                 try {
-                                    user.setChoice(false);
-                                    outputStream.writeObject(user);
+                                    data.setChoiceOfServer(false);
+                                    outputStream.writeObject(data);
                                     outputStream.flush();
                                 } catch (IOException ignored) {
                                 }
@@ -117,25 +101,23 @@ class ServerSomthing extends Thread {
                             et.printStackTrace();
                         }
                     }
-                    else if (user.getChoose().equalsIgnoreCase("ForgotSearch")) {
+                    else if (data.getOrder().equalsIgnoreCase("ForgotSearch")) {
                         try {
-                            String query = "select * from account where Login ='" + user.getName() + "'" ;
+                            String query = "select * from account where Login ='" + data.getUser().getName() + "'" ;
                             Statement statement = connection.createStatement();
                             resultSet = statement.executeQuery(query);
                             if (resultSet.next()){
-                                System.out.println("Success SQL");
                                 String secretP = resultSet.getString("sec_q");
-                                user.setChoice(true);
-                                user.setOrder(secretP);
-                                outputStream.writeObject(user);
+                                data.setChoiceOfServer(true);
+                                data.getUser().setSec_q(secretP);
+                                outputStream.writeObject(data);
                                 outputStream.flush();
                                 resultSet.close();
                             }else {
-                                System.out.println("Not Success SQL");
                                 try {
-                                    user.setChoice(false);
-                                    user.setOrder("");
-                                    outputStream.writeObject(user);
+                                    data.setChoiceOfServer(false);
+                                    data.getUser().setSec_q("");
+                                    outputStream.writeObject(data);
                                     outputStream.flush();
                                     resultSet.close();
                                 } catch (IOException ignored) {
@@ -145,34 +127,29 @@ class ServerSomthing extends Thread {
                             e.printStackTrace();
                         }
                     }
-                    else if (user.getChoose().equalsIgnoreCase("ForgotRetrive")) {
+                    else if (data.getOrder().equalsIgnoreCase("ForgotRetrive")) {
                         try {
-                            String a2 = user.getAnswer();
-                            String n2 = user.getName();
+                            String a2 = data.getUser().getAnswer();
+                            String n2 = data.getUser().getName();
                             String query = "select * from Account where answer = '" + a2 + "' and login ='"+ n2 + "'";
                             preparedStatement = connection.prepareStatement(query);
                             preparedStatement.executeQuery();
-
                             Statement statement = connection.createStatement();
-
                             resultSet = statement.executeQuery(query);
-
                             if (resultSet.next()) {
-                                System.out.println("Success SQL");
                                 String pas = resultSet.getString("password");
                                 try {
-                                    user.setChoice(true);
-                                    user.setPass(pas);
-                                    outputStream.writeObject(user);
+                                    data.setChoiceOfServer(true);
+                                    data.getUser().setPass(pas);
+                                    outputStream.writeObject(data);
                                     outputStream.flush();
                                 } catch (IOException ignored) {
                                 }
                                 resultSet.close();
                             } else {
-                                System.out.println("Not Success SQL");
                                 try {
-                                    user.setChoice(false);
-                                    outputStream.writeObject(user);
+                                    data.setChoiceOfServer(false);
+                                    outputStream.writeObject(data);
                                     outputStream.flush();
                                 } catch (IOException ignored) {
                                 }
@@ -182,19 +159,19 @@ class ServerSomthing extends Thread {
                             e.printStackTrace();
                         }
                     }
-                    else if (user.getChoose().equalsIgnoreCase("Registration")) {
+                    else if (data.getOrder().equalsIgnoreCase("Registration")) {
                         try {
-                            String name = user.getName();
-                            String pass = user.getPass();
-                            String sec_q = user.getSec_q();
-                            String answer = user.getAnswer();
+                            String name = data.getUser().getName();
+                            String pass = data.getUser().getPass();
+                            String sec_q = data.getUser().getSec_q();
+                            String answer = data.getUser().getAnswer();
                             String query = "select * from account where login=?";
                             preparedStatement = connection.prepareStatement(query);
                             preparedStatement.setString(1, name);
                             resultSet = preparedStatement.executeQuery();
                             if (resultSet.next()) {
-                                user.setChoice(false);
-                                outputStream.writeObject(user);
+                                data.setChoiceOfServer(false);
+                                outputStream.writeObject(data);
                                 outputStream.flush();
                                 resultSet.close();
                                 preparedStatement.close();
@@ -207,35 +184,342 @@ class ServerSomthing extends Thread {
                                     preparedStatement.setString(3, sec_q);
                                     preparedStatement.setString(4, answer);
                                     preparedStatement.execute();
-                                    user.setChoice(true);
-                                    outputStream.writeObject(user);
+                                    data.setChoiceOfServer(true);
+                                    outputStream.writeObject(data);
                                     outputStream.flush();
                                     resultSet.close();
                                     preparedStatement.close();
-                                    System.out.println("Success SQL");
                                 } catch (Exception eg) {
                                     eg.printStackTrace();
                                 }
                             }
                         } catch (Exception e) {
-                            System.out.println("Registration no success");
+                            e.printStackTrace();
                         }
                     }
-                    if(user.getName().equals("stop")) {
-                        this.downService(); // харакири
-                        break; // если пришла пустая строка - выходим из цикла прослушки
+                    else if (data.getOrder().equals("addProduct")) {
+                        try {
+                            String query = "select * from product where name=?";
+                            preparedStatement = connection.prepareStatement(query);
+                            preparedStatement.setString(1, data.getProduct().getName());
+                            resultSet = preparedStatement.executeQuery();
+                            if (resultSet.next()) {
+                                data.setChoiceOfServer(false);
+                                outputStream.writeObject(data);
+                                outputStream.flush();
+                                resultSet.close();
+                                preparedStatement.close();
+                            }
+                            else {
+                                try {
+                                    String query1 = "insert into product (Name, amount, price) values (?,?,?)";
+                                    preparedStatement = connection.prepareStatement(query1);
+                                    preparedStatement.setString(1, data.getProduct().getName());
+                                    preparedStatement.setInt(2, data.getProduct().getAmount());
+                                    preparedStatement.setInt(3, data.getProduct().getPrice());
+                                    preparedStatement.execute();
+                                    data.setChoiceOfServer(true);
+                                    outputStream.writeObject(data);
+                                    outputStream.flush();
+                                    resultSet.close();
+                                    preparedStatement.close();
+                                } catch (Exception eg) {
+                                    eg.printStackTrace();
+                                }
+                            }
+                        } catch (Exception e) {
+                            System.out.println("addprod 201 line server");
+                        }
                     }
+                    else if (data.getOrder().equals("searchTopUp")) {
+                        try {
+                            String query = "select * from product where name=?";
+                            preparedStatement = connection.prepareStatement(query);
+                            preparedStatement.setString(1, data.getProduct().getName());
+                            resultSet = preparedStatement.executeQuery();
+                            if (resultSet.next()) {
+
+                                Integer amount = resultSet.getInt("amount");
+                                data.getProduct().setAmount(amount);
+                                data.setChoiceOfServer(true);
+                                outputStream.writeObject(data);
+                                outputStream.flush();
+                                resultSet.close();
+                                preparedStatement.close();
+                            }
+                            else {
+                                data.setChoiceOfServer(false);
+                                outputStream.writeObject(data);
+                                outputStream.flush();
+                                resultSet.close();
+                                preparedStatement.close();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else if (data.getOrder().equals("topUpProduct")) {
+                        try{
+                            String query = "select * from product where name=?";
+                            preparedStatement = connection.prepareStatement(query);
+                            preparedStatement.setString(1, data.getProduct().getName());
+                            resultSet = preparedStatement.executeQuery();
+                            if (resultSet.next()) {
+                                Integer id1 = resultSet.getInt("id");
+                                //System.out.println(id1);
+                                statement = connection.createStatement();
+                                Integer totalAmount = resultSet.getInt("amount");
+                                try {
+                                    totalAmount += +data.getProduct().getAmount();
+                                    if (totalAmount >= 0) {
+                                        statement.execute("UPDATE product SET amount =" + totalAmount + " WHERE id =" + id1);
+                                        data.getProduct().setAmount(totalAmount);
+                                        data.setChoiceOfServer(true);
+                                        outputStream.writeObject(data);
+                                        outputStream.flush();
+                                        statement.close();
+                                    }
+                                    else {
+                                        data.setChoiceOfServer(false);
+                                        outputStream.writeObject(data);
+                                        outputStream.flush();
+                                        statement.close();
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    data.setChoiceOfServer(false);
+                                    outputStream.writeObject(data);
+                                    outputStream.flush();
+                                }
+                            }
+                            else {
+                                data.setChoiceOfServer(false);
+                                outputStream.writeObject(data);
+                                outputStream.flush();
+                            }
+                        } catch(Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else if (data.getOrder().equals("listProducts")) {
+                        ArrayList<Product> list = new ArrayList<>();
+                        try {
+                            PreparedStatement ps = connection.prepareStatement("SELECT * from product");
+                            ResultSet rs = ps.executeQuery();
+                            while(rs.next()){
+                                list.add(new Product((long) rs.getInt("id"), rs.getString("name"), rs.getInt("amount"), rs.getInt("price")));
+                            }
+                            ps.close();
+                            data.setProducts(list);
+                            outputStream.writeObject(data);
+                            outputStream.flush();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                            data.setProducts(null);
+                            outputStream.writeObject(data);
+                            outputStream.flush();
+                        }
+                    }
+                    else if (data.getOrder().equals("deleteProduct")) {
+                        try {
+                            statement = connection.createStatement();
+                            String query = "delete from product where id= " + data.getInteger();
+                            statement.executeUpdate(query);
+                            statement.close();
+                            data.setChoiceOfServer(true);
+                            outputStream.writeObject(data);
+                            outputStream.flush();
+                        } catch (Exception e) {
+                            data.setChoiceOfServer(false);
+                            outputStream.writeObject(data);
+                            outputStream.flush();
+                            e.printStackTrace();
+                        }
+                    }
+                    else if (data.getOrder().equals("checkCash")) {
+                        try {
+                            String query = "select * from account where login=?";
+                            preparedStatement = connection.prepareStatement(query);
+                            preparedStatement.setString(1, data.getUser().getName());
+                            resultSet = preparedStatement.executeQuery();
+                            if (resultSet.next()) {
+                                Integer amount = resultSet.getInt("cash");
+                                data.getUser().setCash(amount);
+                                //System.out.println(data.getUser().getCash());
+                                data.setChoiceOfServer(true);
+                                outputStream.writeObject(data);
+                                outputStream.flush();
+                                resultSet.close();
+                                preparedStatement.close();
+                            }
+                            else {
+                                data.setChoiceOfServer(false);
+                                outputStream.writeObject(data);
+                                outputStream.flush();
+                                resultSet.close();
+                                preparedStatement.close();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else if (data.getOrder().equals("buyProduct")) {
+                        try {
+                            String query = "select * from product where id=?";
+                            preparedStatement = connection.prepareStatement(query);
+                            preparedStatement.setInt(1, data.getInteger());
+                            resultSet = preparedStatement.executeQuery();
+                            if (resultSet.next()) {
+                                Integer amount = resultSet.getInt("amount");
+                                Integer price = resultSet.getInt("price");
+                                Integer totalAmount = data.getProduct().getAmount();
+                                Integer cash = data.getUser().getCash();
+                                int itogCash = cash - price * totalAmount;
+                                int itogAmount = amount - totalAmount;
+                                Integer id1 = data.getInteger();
+                                if (itogAmount >= 0 && itogCash >= 0) {
+                                    //System.out.println("kek");
+                                    try {
+                                        statement = connection.createStatement();
+                                        statement.execute("UPDATE product SET amount =" + itogAmount + " WHERE id =" + id1);
+                                        data.setChoiceOfServer(true);
+                                    } catch (SQLException e) {
+                                        e.printStackTrace();
+                                        data.setChoiceOfServer(false);
+                                    }
+                                    //statement.close();
+                                    try {
+                                        //String query = "select * from product where id=?";
+                                        statement = connection.createStatement();
+                                        //System.out.println(data.getUser().getId());
+                                        Integer id2 = data.getUser().getInteger();
+                                        //System.out.println(id2);
+                                        statement.execute("UPDATE account SET cash =" + itogCash + " WHERE id =" + id2);
+                                        data.setChoiceOfServer(true);
+                                        statement.close();
+                                        resultSet.close();
+                                        preparedStatement.close();
+                                    } catch (Exception ea) {
+                                        ea.printStackTrace();
+                                        data.setChoiceOfServer(false);
+                                    }
+                                    data.getUser().setCash(itogCash);
+                                    data.getProduct().setAmount(itogAmount);
+                                }
+                                else if (itogAmount >=0 && itogCash < 0){
+                                    //System.out.println();
+                                    data.setOrder("NotEnoughCash");
+                                    data.setChoiceOfServer(false);
+                                }
+                                else if (itogAmount < 0 && itogCash >= 0) {
+                                    data.setOrder("NotEnoughAmountOfProduct");
+                                    data.setChoiceOfServer(false);
+                                }
+                                else if (itogAmount < 0 && itogCash < 0) {
+                                    data.setOrder("NotEnoughCash");
+                                    data.setChoiceOfServer(false);
+                                }
+                                outputStream.writeObject(data);
+                                outputStream.flush();
+                                //statement.close();
+                                preparedStatement.close();
+                                resultSet.close();
+                                //System.out.println(id1);
+                            }
+                            else {
+                                data.setChoiceOfServer(false);
+                                outputStream.writeObject(data);
+                                outputStream.flush();
+                                resultSet.close();
+                                preparedStatement.close();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else if (data.getOrder().equals("searchAddCash")) {
+                        try {
+                            String query = "select * from account where login=?";
+                            preparedStatement = connection.prepareStatement(query);
+                            preparedStatement.setString(1, data.getUser().getName());
+                            resultSet = preparedStatement.executeQuery();
+                            if (resultSet.next()) {
+                                Integer amount = resultSet.getInt("cash");
+                                data.getUser().setCash(amount);
+                                data.setChoiceOfServer(true);
+                                outputStream.writeObject(data);
+                                outputStream.flush();
+                                resultSet.close();
+                                preparedStatement.close();
+                            }
+                            else {
+                                data.setChoiceOfServer(false);
+                                outputStream.writeObject(data);
+                                outputStream.flush();
+                                resultSet.close();
+                                preparedStatement.close();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else if (data.getOrder().equals("adminAddCash")) {
+                        try {
+                            String query = "select * from account where login=?";
+                            preparedStatement = connection.prepareStatement(query);
+                            preparedStatement.setString(1, data.getUser().getName());
+                            resultSet = preparedStatement.executeQuery();
+                            if (resultSet.next()) {
+                                //System.out.println("kek1");
+                                Integer amount = resultSet.getInt("cash");
+                                Integer amount2 = data.getInteger();
+                                Integer id1 = resultSet.getInt("id");
+                                Integer totalAmount = amount + amount2;
+                                if (totalAmount >= 0) {
+                                    try {
+                                        statement = connection.createStatement();
+                                        statement.execute("UPDATE account SET cash =" + totalAmount + " WHERE id =" + id1);
+                                        data.setChoiceOfServer(true);
+                                        data.setInteger(totalAmount);
+                                    } catch (SQLException ea) {
+                                        ea.printStackTrace();
+                                    }
+                                }
+                                else {
+                                    data.setChoiceOfServer(false);
+                                }
+                                outputStream.writeObject(data);
+                                outputStream.flush();
+                                preparedStatement.close();
+                                resultSet.close();
+                                //System.out.println(id1);
+                            }
+                            else {
+                                //System.out.println("kek2");
+                                data.setChoiceOfServer(false);
+                                outputStream.writeObject(data);
+                                outputStream.flush();
+                                resultSet.close();
+                                preparedStatement.close();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    /**
+                     * Харакири сервера
+                    if(data.getUser().getName().equals("stop") && data.getUser().getPass().equals("stop")) {
+                        this.downService();
+                        break;
+                    }
+                     */
                 }
             } catch (NullPointerException ignored) {}
         } catch (IOException e) {
-            //this.downService();
             System.out.println("Client lost");
         }
     }
-    /**
-     * закрытие сервера
-     * прерывание себя как нити и удаление из списка нитей
-     */
+
     private void downService() {
         try {
             if(!socket.isClosed()) {
@@ -249,6 +533,7 @@ class ServerSomthing extends Thread {
                     Server.serverList.remove(this);
                 }
             }
+            System.out.println("Server is down");
         } catch (IOException ignored) {}
     }
 }

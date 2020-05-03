@@ -4,18 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.*;
 
 public class ForgotWindow extends Container {
-
-    //Connection connection;
-
-   // ResultSet resultSet;
-
-    //PreparedStatement preparedStatement;
-
-    private ClientSomthing cs;
-
 
     private JLabel MainImage;
 
@@ -46,62 +36,72 @@ public class ForgotWindow extends Container {
         setSize(1280, 720);
         setLayout(null);
 
-        /////////////////////////////////////////////////////
-        /////////////////////////////////////////////////////
-        font = new Font(null, Font.CENTER_BASELINE, 18);
-
-        JLabel tempLabel = new JLabel("WORK IN PROGRESS");
-        tempLabel.setBounds(1000, 600, 250, 100);
-        tempLabel.setFont(font);
-        tempLabel.setForeground(Color.GREEN);
-        add(tempLabel);
-        /////////////////////////////////////////////////////
-        /////////////////////////////////////////////////////
-
-        //connection = Connect.ConnectDb();
+        Color textFieldColor = new Color(128, 87, 61);
 
         font = new Font(null, Font.CENTER_BASELINE, 15);
 
-        usernameL = new JLabel("Username");
-        usernameL.setForeground(Color.green);
-        usernameL.setFont(font);
-        usernameL.setBounds(450, 100, 100, 30);
+        usernameL = new JLabel();
+        ImageIcon nameImage = Main.mf.createIcon("/images/forgotWindow1.png");
+        //usernameL.setForeground(Color.green);
+        //usernameL.setFont(font);
+        usernameL.setIcon(nameImage);
+        usernameL.setBounds(400, 95, 180, 74);
         add(usernameL);
 
-        secretQuestionL = new JLabel("Secret question:");
-        secretQuestionL.setForeground(Color.green);
-        secretQuestionL.setFont(font);
-        secretQuestionL.setBounds(450, 150, 200, 30);
+        secretQuestionL = new JLabel();
+        ImageIcon sqImage = Main.mf.createIcon("/images/forgotWindow2.png");
+        secretQuestionL.setIcon(sqImage);
+        secretQuestionL.setBounds(400, 195, 180, 74);
         add(secretQuestionL);
 
-        answerL = new JLabel("Answer:");
-        answerL.setBounds(500, 200, 100, 30);
+        answerL = new JLabel();
+        ImageIcon ansImage = Main.mf.createIcon("/images/forgotWindow3.png");
+        answerL.setIcon(ansImage);
+        answerL.setBounds(400, 295, 180, 74);
         add(answerL);
 
         passwordL = new JLabel("Password:");
-        passwordL.setBounds(500, 250, 100, 30);
+        ImageIcon passImage = Main.mf.createIcon("/images/forgotWindow4.png");
+        passwordL.setIcon(passImage);
+        passwordL.setBounds(400, 395, 180, 74);
         add(passwordL);
 
+        font = new Font(null, Font.CENTER_BASELINE, 17);
+
         username = new JTextField();
-        username.setBounds(600, 100, 120, 30);
+        username.setForeground(Color.BLACK);
+        username.setFont(font);
+        username.setBackground(textFieldColor);
+        username.setBounds(590, 105, 220, 50);
         add(username);
 
         secretQuestion = new JTextField();
-        secretQuestion.setBounds(600, 150, 120, 30);
+        secretQuestion.setForeground(Color.BLACK);
+        secretQuestion.setFont(font);
+        secretQuestion.setBackground(textFieldColor);
+        secretQuestion.setBounds(590, 205, 220, 50);
         secretQuestion.setEditable(false);
         add(secretQuestion);
 
         answer = new JTextField();
-        answer.setBounds(600, 200, 120, 30);
+        answer.setForeground(Color.BLACK);
+        answer.setFont(font);
+        answer.setBackground(textFieldColor);
+        answer.setBounds(590, 305, 220, 50);
         add(answer);
 
         password = new JTextField();
-        password.setBounds(600, 250, 120, 30);
+        password.setForeground(Color.BLACK);
+        password.setFont(font);
+        password.setBackground(textFieldColor);
+        password.setBounds(590, 405, 220, 50);
         password.setEditable(false);
         add(password);
 
-        search = new JButton("Search");
-        search.setBounds(750, 100, 100, 30);
+        search = new JButton();
+        ImageIcon searchImage = Main.mf.createIcon("/images/forgotWindow5.png");
+        search.setIcon(searchImage);
+        search.setBounds(820, 100, 180, 68);
 
         /*dialog1Label = new JLabel();
         dialog1Label.setBounds(300, 250, 180, 68);
@@ -112,25 +112,34 @@ public class ForgotWindow extends Container {
         search.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Search();
+                if (!username.getText().equalsIgnoreCase("admin"))
+                    Search();
+                else
+                    dialog1(false, "");
             }
         });
         add(search);
 
-        retrieve = new JButton("Retrieve");
-        retrieve.setBounds(750, 200, 100, 30);
+        retrieve = new JButton();
+        ImageIcon retrieveImage = Main.mf.createIcon("/images/forgotWindow6.png");
+        retrieve.setIcon(retrieveImage);
+        retrieve.setBounds(820, 300, 180, 68);
 
         retrieve.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Retrive();
+                if (!username.getText().equalsIgnoreCase("admin"))
+                    Retrive();
+                else
+                    dialog2(false, "");
             }
         });
         add(retrieve);
 
-        back = new JButton("BACK");
-        back.setBackground(Color.BLUE);
-        back.setBounds(750, 250, 100, 50);
+        back = new JButton();
+        ImageIcon backImage = Main.mf.createIcon("/images/forgotWindow7.png");
+        back.setIcon(backImage);
+        back.setBounds(610, 490, 180, 68);
         back.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -155,11 +164,10 @@ public class ForgotWindow extends Container {
 
     public void Search(){
         User user = new User(null, username.getText(), null, null, null);
-        user.setChoose("ForgotSearch");
-
+        Data data = new Data("ForgotSearch", user);
         if (!username.getText().equalsIgnoreCase("")) {
             try {
-                cs = new ClientSomthing(Main.ipAddr, Main.port, user);
+                Main.forgotSearch(data);
             } catch (Exception e) {
                 System.out.println("No connection to server, pls run server");
                 JOptionPane.showMessageDialog(null, "Run server first");
@@ -167,70 +175,24 @@ public class ForgotWindow extends Container {
         } else {
             dialog1(false, "");
         }
-/*
-        try {
-            String text = username.getText();
-
-            String query = "select * from account where Login ='" + text + "'" ;
-
-            Statement statement = connection.createStatement();
-
-
-            resultSet = statement.executeQuery(query);
-
-            if (resultSet.next()){
-                //JOptionPane.showMessageDialog(null,"It is login true");
-                ImageIcon DialogImage1 = Main.mf.createIcon("LibraryDialog1.png");
-                b1.setIcon(DialogImage1);
-
-                String secretP = resultSet.getString("sec_q");
-
-                //System.out.println(secretP);
-
-                secretQuestion.setText(secretP);
-//                resultSet.close();
-//                preparedStatement.close();
-
-            }else {
-                //JOptionPane.showMessageDialog(null, "Incorerct login");
-                ImageIcon DialogImage2 = Main.mf.createIcon("LibraryDialog2.png");
-                secretQuestion.setText("");
-                answer.setText("");
-                password.setText("");
-                b1.setIcon(DialogImage2);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        b1.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dialog.dispose();
-            }
-        });
-        dialog.add(b1);
-        dialog.setVisible(true);*/
     }
 
     public void dialog1(Boolean choice, String secretP) {
         JDialog dialog = Main.mf.createDialog("Librarian:", true, 310, 160);
-
         try {
             b1 = new JButton();
             if (choice == true) {
-                //JOptionPane.showMessageDialog(null,"It is login true");
                 try {
                     ImageIcon DialogImage1 = Main.mf.createIcon("/images/LibraryDialog1.png");
-
                     b1.setIcon(DialogImage1);
                     secretQuestion.setText(secretP);
+                    //System.out.println("Hm");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
             else {
-                //System.out.println("suka");
+                //System.out.println("ллл");
                 ImageIcon DialogImage2 = Main.mf.createIcon("/images/LibraryDialog2.png");
                 secretQuestion.setText("");
                 answer.setText("");
@@ -253,11 +215,11 @@ public class ForgotWindow extends Container {
 
     public void Retrive() {
         User user = new User(null, username.getText(), null, null, answer.getText());
-        user.setChoose("ForgotRetrive");
+        Data data = new Data("forgotRetrive", user);
 
         if (!username.getText().equalsIgnoreCase("") && !answer.getText().equalsIgnoreCase("")) {
             try {
-                cs = new ClientSomthing(Main.ipAddr, Main.port, user);
+                Main.forgotRetrive(data);
             } catch (Exception e) {
                 System.out.println("No connection to server, pls run server");
                 JOptionPane.showMessageDialog(null, "Run server first");
@@ -266,53 +228,34 @@ public class ForgotWindow extends Container {
         else {
             JOptionPane.showMessageDialog(null, "Joldardy toltyr");
         }
-
-        /*if (username.getText().equalsIgnoreCase("") || answer.getText().equalsIgnoreCase("")) {
-            JOptionPane.showMessageDialog(null, "Joldardy toltyr");
-        } else {
-
-            try {
-                String a2 = answer.getText();
-                String n2 = username.getText();
-                String query = "select * from Account where answer = '" + a2 + "' and login ='"+ n2 + "'";
-                //select * from account where login=? and password=?
-                preparedStatement = connection.prepareStatement(query);
-                preparedStatement.executeQuery();
-
-                Statement statement = connection.createStatement();
-
-
-                resultSet = statement.executeQuery(query);
-
-                if (resultSet.next()) {
-                    String ans = resultSet.getString("answer");
-
-                    String pas = resultSet.getString("password");
-
-                    if (a2.equalsIgnoreCase(ans)) {
-                        JOptionPane.showMessageDialog(null, "Correct");
-
-                        password.setText(pas);
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(null, "Incorrect answer");
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        }*/
     }
 
     public void dialog2(Boolean choice, String password) {
+        JDialog dialog = Main.mf.createDialog("Librarian:", true, 310, 160);
+        b1 = new JButton();
         if (choice == true) {
-            JOptionPane.showMessageDialog(null, "Correct");
+            //JOptionPane.showMessageDialog(null, "Correct");
             this.password.setText(password);
+            try {
+                ImageIcon DialogImage1 = Main.mf.createIcon("/images/forgotWindow8.png");
+                b1.setIcon(DialogImage1);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         else {
-            JOptionPane.showMessageDialog(null, "Incorrect answer");
+            ImageIcon DialogImage2 = Main.mf.createIcon("/images/forgotWindow9.png");
+            b1.setIcon(DialogImage2);
+            //JOptionPane.showMessageDialog(null, "Incorrect answer");
         }
+        b1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dialog.dispose();
+            }
+        });
+        dialog.add(b1);
+        dialog.setVisible(true);
     }
 
 }
