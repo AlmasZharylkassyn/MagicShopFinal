@@ -17,12 +17,12 @@ import java.util.ArrayList;
 
 public class Main {
     public static MainFrame mf;
-    public static String ipAddr = "localhost";
-    public static int port = 8080;
-    public static Socket socket;
-    public static ObjectOutputStream outputStream;
-    public static ObjectInputStream inputStream;
-    public static User userData;
+    private static String ipAddr = "localhost";
+    private static int port = 8080;
+    private static Socket socket;
+    private static ObjectOutputStream outputStream;
+    private static ObjectInputStream inputStream;
+    private static User userData;
 
     private static String myLogin;
     private static String myPassword;
