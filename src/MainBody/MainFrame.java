@@ -16,7 +16,7 @@ public class MainFrame extends JFrame {
 
     public MainFrame() {
         setSize(1280, 720);
-        setTitle("Magic Shop Version-0.3 Include sockets");
+        setTitle("Magic Shop");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         try {
