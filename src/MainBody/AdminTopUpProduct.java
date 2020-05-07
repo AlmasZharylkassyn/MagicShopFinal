@@ -140,7 +140,7 @@ public class AdminTopUpProduct extends Container {
     public void dialog1(Boolean choice, Integer count) {
         if (choice) {
             String amountTemp = String.valueOf(count);
-            JOptionPane.showMessageDialog(null, "Correcr name");
+            JOptionPane.showMessageDialog(null, "Correct name");
             amount.setText(amountTemp);
         }
         else {

@@ -116,7 +116,7 @@ public class AdminChangeCash extends Container {
     public void dialog1(Boolean choice, Integer count) {
         if (choice) {
             String cashTemp = String.valueOf(count);
-            JOptionPane.showMessageDialog(null, "Correcr name");
+            JOptionPane.showMessageDialog(null, "Correct name");
             cashCount.setText(cashTemp);
         }
         else {
